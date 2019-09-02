@@ -1,0 +1,109 @@
+{
+  "variables": {
+    "aws_access_key": "",
+    "aws_secret_key": "",
+    "ami_name": "",
+    "packer_version": "1.0.4",
+    "teamcity_server": "teamcity.mesosphere.io"
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "region": "us-west-2",
+    "source_ami": "ami-b8b92dc0",
+    "instance_type": "m4.2xlarge",
+    "communicator": "winrm",
+    "winrm_username": "Administrator",
+    "user_data_file": "./windows-agent/setup_winrm.ps1",
+    "ami_name": "{{user `ami_name`}}",
+    "subnet_id": "subnet-b995becd",
+    "security_group_id": "sg-2e7cf054",
+    "ami_block_device_mappings": [{
+      "device_name": "/dev/sda1",
+      "delete_on_termination": true,
+      "volume_size": "200",
+      "volume_type": "gp2"
+    }],
+    "launch_block_device_mappings": [{
+      "device_name": "/dev/sda1",
+      "delete_on_termination": true,
+      "volume_size": "200",
+      "volume_type": "gp2"
+    }]
+  }],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "windows-agent/install_teamcity_agent.ps1",
+      "destination": "C:\\Users\\Administrator\\install_teamcity_agent.ps1"
+    },
+    {
+      "type": "powershell",
+      "inline": [ "Powershell -NonInteractive -File \"C:\\Users\\Administrator\\install_teamcity_agent.ps1\"" ]
+    },
+    {
+      "type": "file",
+      "source": "windows-agent/install_teamcity_agent.config",
+      "destination": "C:\\BuildAgent\\conf\\buildAgent.properties"
+    },
+
+    {
+      "type": "file",
+      "source": "windows-agent/install_programs.ps1",
+      "destination": "C:\\Users\\Administrator\\install_programs.ps1"
+    },
+    {
+      "type": "file",
+      "source": "windows-agent/install_chocolatey.ps1",
+      "destination": "C:\\Users\\Administrator\\install_chocolatey.ps1"
+    },
+    {
+      "type": "file",
+      "source": "windows-agent/install_packages.ps1",
+      "destination": "C:\\Users\\Administrator\\install_packages.ps1"
+    },
+    {                                   
+      "type": "file",
+      "source": "windows-agent/softwareToInstall.json",
+      "destination": "C:\\Users\\Administrator\\softwareToInstall.json"
+    },
+    {
+      "type": "file",
+      "source": "windows-agent/chocoPackages.json",
+      "destination": "C:\\Users\\Administrator\\chocoPackages.json"
+    },
+    {
+      "type": "powershell",
+      "inline": [
+        "Powershell -NonInteractive -File \"C:\\Users\\Administrator\\install_chocolatey.ps1\""
+      ]
+    },
+    {
+      "type": "powershell",
+      "inline": [
+        "Powershell -NonInteractive -File \"C:\\Users\\Administrator\\install_packages.ps1\" -json \"C:\\Users\\Administrator\\chocoPackages.json\""
+      ]
+    },
+    {
+      "type": "powershell",
+      "inline": [
+        "Powershell -NonInteractive -File \"C:\\Users\\Administrator\\install_programs.ps1\" -json \"C:\\Users\\Administrator\\softwareToInstall.json\""
+      ]
+    },
+    {
+      "type": "powershell",
+      "inline": [
+        "Powershell -NonInteractive pip3.5 install virtualenv",
+        "Powershell -NonInteractive pip3.6 install virtualenv"
+      ]
+    },
+    {
+      "type": "powershell",
+      "inline": [
+        "C:\\ProgramData\\Amazon\\EC2-Windows\\Launch\\Scripts\\InitializeInstance.ps1 -Schedule",
+        "C:\\ProgramData\\Amazon\\EC2-Windows\\Launch\\Scripts\\SysprepInstance.ps1 -NoShutdown"
+      ]
+    }
+  ]
+}

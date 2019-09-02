@@ -1,0 +1,29 @@
+{
+  "config": {
+    "downloadLocation": "c:\\Software"
+  },
+  "software": [
+    {
+      "name": "WinBash",
+      "description": "winbash",
+      "url": "https://downloads.mesosphere.com/win-bash/1.1-x86_64/win-bash.zip",
+      "arguments": "",
+      "path": "C:\\Program Files\\win-bash",
+      "cookie": null,
+      "downloadOnlyTo": "C:\\Program Files\\win-bash",
+      "type": null,
+      "executeAfter": null
+    },
+    {
+      "name": "Jdk8",
+      "description": "Java Development Kit 8",
+      "url": "https://downloads.mesosphere.com/java/jdk-8u144-windows-x64.exe",
+      "arguments": "/s REBOOT=ReallySuppress",
+      "path": null,
+      "cookie": null,
+      "downloadOnlyTo": null,
+      "type": null,
+      "executeAfter": null
+    }
+  ]
+}
